@@ -1,0 +1,35 @@
+use flate2::Compression;
+use flate2::read::ZlibDecoder;
+use flate2::write::ZlibEncoder;
+use sha1::{Digest, Sha1};
+use std::io::{Read, Write};
+use std::path::Path;
+
+/// Check if repo is initilized
+pub fn is_repo_init() -> bool {
+    let kitkat_path = Path::new(".kitkat");
+    let head_path = Path::new(".kitkat/HEAD");
+    kitkat_path.exists() && head_path.exists()
+}
+
+/// Compute SHA-1 hash of data
+pub fn compute_hash(data: &[u8]) -> String {
+    let mut hasher = Sha1::new();
+    hasher.update(data);
+    format!("{:x}", hasher.finalize())
+}
+
+/// Compress data using Zlib
+pub fn compress_data(data: &[u8]) -> Vec<u8> {
+    let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
+    encoder.write_all(data).unwrap();
+    encoder.finish().unwrap()
+}
+
+/// Decompress data using Zlib
+pub fn decompress_data(data: &[u8]) -> Vec<u8> {
+    let mut decoder = ZlibDecoder::new(data);
+    let mut out = Vec::new();
+    decoder.read_to_end(&mut out).unwrap();
+    out
+}
