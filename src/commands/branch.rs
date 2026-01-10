@@ -176,7 +176,7 @@ pub fn switch_branch(name: &str) -> io::Result<()> {
     // For now, we'll just switch
 
     // Get the commit hash for the branch
-    let commit_hash = fs::read_to_string(&branch_path)?.trim().to_string();
+    let _commit_hash = fs::read_to_string(&branch_path)?.trim().to_string();
 
     // TODO: Checkout the tree for this commit
     // For now, just update HEAD

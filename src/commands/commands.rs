@@ -145,7 +145,7 @@ pub fn commit(message: String) {
         }
     } else if head_content.len() == 40 {
         // Detached HEAD
-        vec![head_content]
+        vec![head_content.clone()]
     } else {
         vec![] // No parent (first commit)
     };

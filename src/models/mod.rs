@@ -32,7 +32,7 @@ pub struct IndexEntry {
 impl IndexEntry {
     /// Create a new index entry from file metadata
     pub fn from_file(path: String, hash: String, metadata: &std::fs::Metadata) -> Self {
-        use std::os::unix::fs::MetadataExt;
+        use std::os::unix::fs::{MetadataExt, PermissionsExt};
         use std::time::SystemTime;
 
         let ctime = metadata.ctime();
