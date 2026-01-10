@@ -1,6 +1,10 @@
+pub mod branch;
 pub mod commands;
+pub mod log;
 
 // Re-export functions
+pub use branch::{create_branch, delete_branch, list_branches, show_current_branch, switch_branch};
+pub use log::{log, log_with_filter, LogFormat};
 pub use commands::add_to_index;
 pub use commands::commit;
 pub use commands::get_config_cmd;

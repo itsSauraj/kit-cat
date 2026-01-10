@@ -77,6 +77,26 @@ enum Commands {
         /// Config value (if setting)
         value: Option<String>,
     },
+    /// Branch operations
+    Branch {
+        /// Branch name (if creating or switching)
+        name: Option<String>,
+        /// Delete branch
+        #[arg(short = 'd', long = "delete")]
+        delete: bool,
+        /// Force delete (ignore unmerged changes)
+        #[arg(short = 'D', long = "force-delete")]
+        force_delete: bool,
+    },
+    /// Show commit history
+    Log {
+        /// Show in oneline format
+        #[arg(long = "oneline")]
+        oneline: bool,
+        /// Maximum number of commits to show
+        #[arg(short = 'n', long = "max-count")]
+        max_count: Option<usize>,
+    },
 }
 
 fn main() {
@@ -112,6 +132,57 @@ fn main() {
                 set_config_cmd(key, val);
             } else {
                 get_config_cmd(key);
+            }
+        }
+        Commands::Branch {
+            name,
+            delete,
+            force_delete,
+        } => {
+            if delete || force_delete {
+                // Delete branch
+                if let Some(branch_name) = name {
+                    if let Err(e) = delete_branch(&branch_name, force_delete) {
+                        eprintln!("Error: {}", e);
+                        std::process::exit(1);
+                    }
+                } else {
+                    eprintln!("Error: branch name required for deletion");
+                    std::process::exit(1);
+                }
+            } else if let Some(branch_name) = name {
+                // Create or switch branch
+                // Try to switch first, if it exists
+                if std::path::Path::new(&format!(".kitkat/refs/heads/{}", branch_name)).exists() {
+                    if let Err(e) = switch_branch(&branch_name) {
+                        eprintln!("Error: {}", e);
+                        std::process::exit(1);
+                    }
+                } else {
+                    // Create new branch
+                    if let Err(e) = create_branch(&branch_name) {
+                        eprintln!("Error: {}", e);
+                        std::process::exit(1);
+                    }
+                }
+            } else {
+                // List branches
+                if let Err(e) = list_branches() {
+                    eprintln!("Error: {}", e);
+                    std::process::exit(1);
+                }
+            }
+        }
+        Commands::Log { oneline, max_count } => {
+            let format = if oneline {
+                LogFormat::Oneline
+            } else {
+                LogFormat::Full
+            };
+
+            if let Err(e) = log(format, max_count) {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
             }
         }
     }
