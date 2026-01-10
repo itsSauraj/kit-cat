@@ -5,7 +5,7 @@ use sha1::{Digest, Sha1};
 use std::io::{Read, Write};
 use std::path::Path;
 
-/// Check if repo is initilized
+/// Check if repo is initialized
 pub fn is_repo_init() -> bool {
     let kitkat_path = Path::new(".kitkat");
     let head_path = Path::new(".kitkat/HEAD");

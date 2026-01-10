@@ -1,4 +1,5 @@
 mod commands;
+mod config;
 mod index;
 mod models;
 mod object;
@@ -51,6 +52,31 @@ enum Commands {
     },
     /// Read the current HEAD
     ReadHead,
+    /// Write a tree from the current index
+    WriteTree,
+    /// List the contents of a tree
+    ListTree {
+        /// The hash of the tree to list
+        hash: String,
+    },
+    /// Create a commit
+    Commit {
+        /// Commit message
+        #[arg(short = 'm', long = "message")]
+        message: String,
+    },
+    /// Show commit details
+    ShowCommit {
+        /// The hash of the commit to show
+        hash: String,
+    },
+    /// Set or get a config value
+    Config {
+        /// Config key (e.g., user.name, user.email)
+        key: String,
+        /// Config value (if setting)
+        value: Option<String>,
+    },
 }
 
 fn main() {
@@ -74,6 +100,19 @@ fn main() {
         Commands::ReadHead => {
             let head = read_head();
             println!("{}", head);
+        }
+        Commands::WriteTree => {
+            write_tree();
+        }
+        Commands::ListTree { hash } => list_tree(hash),
+        Commands::Commit { message } => commit(message),
+        Commands::ShowCommit { hash } => show_commit_cmd(hash),
+        Commands::Config { key, value } => {
+            if let Some(val) = value {
+                set_config_cmd(key, val);
+            } else {
+                get_config_cmd(key);
+            }
         }
     }
 }
