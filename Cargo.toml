@@ -1,7 +1,23 @@
 [package]
-name = "kitkat"
+name = "kitcat"
 version = "0.1.0"
 edition = "2024"
+
+[[bin]]
+name = "kitcat"
+path = "src/main.rs"
+
+[[bin]]
+name = "kit-cat"
+path = "src/main.rs"
+
+[[bin]]
+name = "kc"
+path = "src/main.rs"
+
+[[bin]]
+name = "kit"
+path = "src/main.rs"
 
 [dependencies]
 sha1 = "0.10.6"

@@ -26,9 +26,9 @@ impl Default for Config {
 }
 
 impl Config {
-    /// Read config from .kitkat/config
+    /// Read config from .kitcat/config
     pub fn read() -> io::Result<Self> {
-        let config_path = Path::new(".kitkat/config");
+        let config_path = Path::new(".kitcat/config");
 
         if !config_path.exists() {
             // Return default config if file doesn't exist
@@ -44,9 +44,9 @@ impl Config {
         })
     }
 
-    /// Write config to .kitkat/config
+    /// Write config to .kitcat/config
     pub fn write(&self) -> io::Result<()> {
-        let config_path = Path::new(".kitkat/config");
+        let config_path = Path::new(".kitcat/config");
         let content = toml::to_string_pretty(self).map_err(|e| {
             io::Error::new(
                 io::ErrorKind::InvalidData,

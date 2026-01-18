@@ -112,7 +112,7 @@ fn diff_working_vs_index(options: &DiffOptions) -> io::Result<()> {
         // Read from object store
         let obj_dir = &index_hash[0..2];
         let obj_file = &index_hash[2..];
-        let obj_path = format!(".kitkat/objects/{}/{}", obj_dir, obj_file);
+        let obj_path = format!(".kitcat/objects/{}/{}", obj_dir, obj_file);
 
         let compressed = fs::read(&obj_path)?;
         let object_content = crate::utils::decompress(&compressed)?;
@@ -383,7 +383,7 @@ fn get_head_files() -> io::Result<HashMap<String, String>> {
 
     let commit_hash = if head_content.starts_with("ref:") {
         let branch_name = head_content.trim_start_matches("ref: ").trim();
-        let branch_path = format!(".kitkat/{}", branch_name);
+        let branch_path = format!(".kitcat/{}", branch_name);
 
         if !Path::new(&branch_path).exists() {
             return Ok(HashMap::new());
@@ -438,7 +438,7 @@ fn collect_tree_files(
 fn read_object_content(hash: &str) -> io::Result<Vec<u8>> {
     let obj_dir = &hash[0..2];
     let obj_file = &hash[2..];
-    let obj_path = format!(".kitkat/objects/{}/{}", obj_dir, obj_file);
+    let obj_path = format!(".kitcat/objects/{}/{}", obj_dir, obj_file);
 
     let compressed = fs::read(&obj_path)?;
     let content = crate::utils::decompress(&compressed)?;

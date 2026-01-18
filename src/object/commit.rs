@@ -120,12 +120,12 @@ fn parse_commit(data: &[u8]) -> io::Result<Commit> {
     })
 }
 
-/// Store an object in the .kitkat/objects directory
+/// Store an object in the .kitcat/objects directory
 fn store_object(hash: &str, content: &[u8]) -> io::Result<()> {
     let dir_name = &hash[0..2];
     let file_name = &hash[2..];
 
-    let dir_path = Path::new(".kitkat/objects").join(dir_name);
+    let dir_path = Path::new(".kitcat/objects").join(dir_name);
     fs::create_dir_all(&dir_path)?;
 
     let file_path = dir_path.join(file_name);
@@ -147,7 +147,7 @@ fn read_object_content(hash: &str) -> io::Result<Vec<u8>> {
     let dir_name = &hash[0..2];
     let file_name = &hash[2..];
 
-    let file_path = Path::new(".kitkat/objects")
+    let file_path = Path::new(".kitcat/objects")
         .join(dir_name)
         .join(file_name);
 

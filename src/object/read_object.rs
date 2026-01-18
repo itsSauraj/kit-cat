@@ -3,7 +3,7 @@
 
 // /// Read an object by its hash
 // pub fn read_object(hash: String, pretty: bool) {
-//     let path = format!(".kitkat/objects/{}/{}", &hash[..2], &hash[2..]);
+//     let path = format!(".kitcat/objects/{}/{}", &hash[..2], &hash[2..]);
 //     let compressed = fs::read(&path).expect("Object not found");
 //     let decompressed = decompress_data(&compressed);
 
@@ -66,7 +66,7 @@ pub fn read_object(hash: String, pretty: bool) {
 
 fn find_matching_objects(hash_prefix: &str) -> Vec<ObjectInfo> {
     let mut matches = Vec::new();
-    let objects_dir = ".kitkat/objects";
+    let objects_dir = ".kitcat/objects";
 
     if let Ok(entries) = fs::read_dir(objects_dir) {
         for entry in entries.flatten() {

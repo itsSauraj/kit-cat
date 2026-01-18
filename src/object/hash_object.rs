@@ -10,7 +10,7 @@ pub fn hash_object(file: String) -> String {
     store.extend_from_slice(&data);
 
     let hash = compute_hash(&store);
-    let dir = format!(".kitkat/objects/{}", &hash[..2]);
+    let dir = format!(".kitcat/objects/{}", &hash[..2]);
     let file_path = format!("{}/{}", dir, &hash[2..]);
     fs::create_dir_all(&dir).unwrap();
     fs::write(&file_path, compress_data(&store)).unwrap();

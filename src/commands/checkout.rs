@@ -9,7 +9,7 @@ use std::path::Path;
 /// Checkout a branch, commit, or restore files
 pub fn checkout(target: &str, force: bool) -> io::Result<()> {
     // Check if target is a branch
-    let branch_path = format!(".kitkat/refs/heads/{}", target);
+    let branch_path = format!(".kitcat/refs/heads/{}", target);
 
     if Path::new(&branch_path).exists() {
         // Checkout branch
@@ -27,7 +27,7 @@ pub fn checkout(target: &str, force: bool) -> io::Result<()> {
 
 /// Checkout a branch by name
 fn checkout_branch(branch_name: &str, force: bool) -> io::Result<()> {
-    let branch_path = format!(".kitkat/refs/heads/{}", branch_name);
+    let branch_path = format!(".kitcat/refs/heads/{}", branch_name);
 
     // Check if branch exists
     if !Path::new(&branch_path).exists() {
@@ -106,7 +106,7 @@ pub fn checkout_file(file_path: &str) -> io::Result<()> {
             let hash_hex = &entry.hash;
             let obj_dir = &hash_hex[0..2];
             let obj_file = &hash_hex[2..];
-            let obj_path = format!(".kitkat/objects/{}/{}", obj_dir, obj_file);
+            let obj_path = format!(".kitcat/objects/{}/{}", obj_dir, obj_file);
 
             let compressed = fs::read(&obj_path)?;
             let content = crate::utils::decompress(&compressed)?;
@@ -141,7 +141,7 @@ fn has_uncommitted_changes() -> io::Result<bool> {
     // Get HEAD commit (resolve if it's a branch reference)
     let commit_hash = if head_content.starts_with("ref:") {
         let branch_name = head_content.trim_start_matches("ref: ").trim();
-        let branch_path = format!(".kitkat/{}", branch_name);
+        let branch_path = format!(".kitcat/{}", branch_name);
 
         if !Path::new(&branch_path).exists() {
             return Ok(false); // No commits yet, no uncommitted changes
@@ -243,7 +243,7 @@ fn restore_tree_recursive(tree_hash: &str, prefix: &str) -> io::Result<()> {
 fn restore_blob(hash: &str, path: &str) -> io::Result<()> {
     let obj_dir = &hash[0..2];
     let obj_file = &hash[2..];
-    let obj_path = format!(".kitkat/objects/{}/{}", obj_dir, obj_file);
+    let obj_path = format!(".kitcat/objects/{}/{}", obj_dir, obj_file);
 
     let compressed = fs::read(&obj_path)?;
     let content = crate::utils::decompress(&compressed)?;
@@ -343,7 +343,7 @@ fn find_commit_hash(partial: &str) -> io::Result<String> {
     // Look in objects directory
     let prefix = &partial[0..2];
     let rest = &partial[2..];
-    let obj_dir = format!(".kitkat/objects/{}", prefix);
+    let obj_dir = format!(".kitcat/objects/{}", prefix);
 
     if let Ok(entries) = fs::read_dir(&obj_dir) {
         for entry in entries.flatten() {

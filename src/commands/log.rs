@@ -10,7 +10,7 @@ pub fn log(format: LogFormat, max_count: Option<usize>) -> io::Result<()> {
     let start_commit = if head_content.starts_with("ref:") {
         // HEAD points to a branch
         let branch_name = head_content.trim_start_matches("ref: ").trim();
-        let branch_path = format!(".kitkat/{}", branch_name);
+        let branch_path = format!(".kitcat/{}", branch_name);
 
         if !std::path::Path::new(&branch_path).exists() {
             println!("No commits yet.");
@@ -130,7 +130,7 @@ pub fn log_with_filter(
     let head_content = crate::repo::read_head();
     let start_commit = if head_content.starts_with("ref:") {
         let branch_name = head_content.trim_start_matches("ref: ").trim();
-        let branch_path = format!(".kitkat/{}", branch_name);
+        let branch_path = format!(".kitcat/{}", branch_name);
 
         if !std::path::Path::new(&branch_path).exists() {
             println!("No commits yet.");

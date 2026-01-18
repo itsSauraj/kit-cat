@@ -310,7 +310,7 @@ fn create_binary_conflict(
 fn read_object_content(hash: &str) -> io::Result<Vec<u8>> {
     let obj_dir = &hash[0..2];
     let obj_file = &hash[2..];
-    let obj_path = format!(".kitkat/objects/{}/{}", obj_dir, obj_file);
+    let obj_path = format!(".kitcat/objects/{}/{}", obj_dir, obj_file);
 
     let compressed = fs::read(&obj_path)?;
     let content = crate::utils::decompress(&compressed)?;
