@@ -7,9 +7,9 @@ use std::path::Path;
 
 /// Check if repo is initialized
 pub fn is_repo_init() -> bool {
-    let kitkat_path = Path::new(".kitkat");
-    let head_path = Path::new(".kitkat/HEAD");
-    kitkat_path.exists() && head_path.exists()
+    let kitcat_path = Path::new(".kitcat");
+    let head_path = Path::new(".kitcat/HEAD");
+    kitcat_path.exists() && head_path.exists()
 }
 
 /// Compute SHA-1 hash of data

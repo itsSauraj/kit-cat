@@ -1,17 +1,17 @@
-# KitKat VCS
+# KitCat VCS
 
 [![Rust](https://img.shields.io/badge/rust-1.92%2B-orange.svg)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.rst)
 [![Status](https://img.shields.io/badge/status-alpha-yellow.svg)]()
 
-**KitKat** is a Git-like version control system implemented in Rust, designed to be simple, fast, and Git-compatible where possible. It's an educational project demonstrating how version control systems work under the hood.
+**KitCat** is a Git-like version control system implemented in Rust, designed to be simple, fast, and Git-compatible where possible. It's an educational project demonstrating how version control systems work under the hood.
 
 ## ✨ Features
 
 ### ✅ Currently Implemented
 
 - **Repository Management**
-  - Initialize repositories (`.kitkat` directory structure)
+  - Initialize repositories (`.kitcat` directory structure)
   - Configuration management (user.name, user.email)
 
 - **Object Storage**
@@ -60,13 +60,13 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/kitkat.git
-cd kitkat
+git clone https://github.com/yourusername/kitcat.git
+cd kitcat
 
 # Build in release mode
 cargo build --release
 
-# The binary is at target/release/kitkat
+# The binary is at target/release/kitcat
 # Optionally, add to your PATH
 ```
 
@@ -76,21 +76,21 @@ See the [Installation Guide](docs/installation.md) for detailed instructions.
 
 ```bash
 # Initialize a new repository
-kitkat init
+kitcat init
 
 # Configure your identity
-kitkat config user.name "Your Name"
-kitkat config user.email "you@example.com"
+kitcat config user.name "Your Name"
+kitcat config user.email "you@example.com"
 
 # Create and add a file
 echo "# My Project" > README.md
-kitkat add README.md
+kitcat add README.md
 
 # Create your first commit
-kitkat commit -m "Initial commit"
+kitcat commit -m "Initial commit"
 
 # View history
-kitkat log
+kitcat log
 ```
 
 See the [Quick Start Guide](docs/quick-start.md) for a complete tutorial.
@@ -105,7 +105,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
   - [Command Reference](docs/command-reference.md)
 
 - **Guides**
-  - [Testing Guide](docs/testing-guide.md) - How to test KitKat
+  - [Testing Guide](docs/testing-guide.md) - How to test KitCat
   - [Architecture](docs/architecture.md) - System design and internals
 
 ## 🛠️ Development
@@ -144,7 +144,7 @@ cargo test test_name
 cargo test -- --nocapture
 
 # Run manual tests
-./test-kitkat.sh  # See docs/testing-guide.md
+./test-kitcat.sh  # See docs/testing-guide.md
 ```
 
 ## 📖 Usage Examples
@@ -153,96 +153,96 @@ cargo test -- --nocapture
 
 ```bash
 # Initialize repository
-kitkat init
+kitcat init
 
 # Configure identity
-kitkat config user.name "Developer"
-kitkat config user.email "dev@example.com"
+kitcat config user.name "Developer"
+kitcat config user.email "dev@example.com"
 
 # Add files
-kitkat add file1.txt
-kitkat add file2.txt
+kitcat add file1.txt
+kitcat add file2.txt
 
 # Create commit
-kitkat commit -m "Add initial files"
+kitcat commit -m "Add initial files"
 
 # View history
-kitkat log --oneline
+kitcat log --oneline
 ```
 
 ### Working with Branches
 
 ```bash
 # Create a branch
-kitkat branch feature-x
+kitcat branch feature-x
 
 # List branches
-kitkat branch
+kitcat branch
 
 # Switch to branch
-kitkat branch feature-x
+kitcat branch feature-x
 
 # Make changes and commit
-kitkat add newfile.txt
-kitkat commit -m "Add feature"
+kitcat add newfile.txt
+kitcat commit -m "Add feature"
 
 # Switch back to master
-kitkat branch master
+kitcat branch master
 
 # Delete branch
-kitkat branch -d feature-x
+kitcat branch -d feature-x
 ```
 
 ### Merging Branches
 
 ```bash
 # Create and switch to a feature branch
-kitkat branch feature
-kitkat checkout feature
+kitcat branch feature
+kitcat checkout feature
 
 # Make changes on feature branch
 echo "new feature" > feature.txt
-kitkat add feature.txt
-kitkat commit -m "Add new feature"
+kitcat add feature.txt
+kitcat commit -m "Add new feature"
 
 # Switch back to master
-kitkat checkout master
+kitcat checkout master
 
 # Merge feature into master
-kitkat merge feature
+kitcat merge feature
 
 # If there are conflicts:
 # - Edit files to resolve conflicts
 # - Stage the resolved files
-kitkat add resolved-file.txt
+kitcat add resolved-file.txt
 # - Continue the merge
-kitkat merge --continue
+kitcat merge --continue
 
 # Or abort the merge
-kitkat merge --abort
+kitcat merge --abort
 ```
 
 ### Inspecting Objects
 
 ```bash
 # Write tree from index
-kitkat write-tree
+kitcat write-tree
 
 # List tree contents
-kitkat list-tree <tree-hash>
+kitcat list-tree <tree-hash>
 
 # Show commit details
-kitkat show-commit <commit-hash>
+kitcat show-commit <commit-hash>
 
 # View commit history
-kitkat log
-kitkat log --oneline
-kitkat log -n 5
+kitcat log
+kitcat log --oneline
+kitcat log -n 5
 ```
 
 ## 🏗️ Architecture
 
-KitKat uses a modular architecture:
+KitCat uses a modular architecture:
 
 ```
 ┌─────────────────────────────────────┐
@@ -332,8 +332,8 @@ This project is licensed under the MIT License - see the [LICENSE.rst](LICENSE.r
 
 ## 📞 Support & Contact
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/kitkat/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/kitkat/discussions)
+- **Issues**: [GitHub Issues](https://github.com/yourusername/kitcat/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/kitcat/discussions)
 - **Documentation**: [docs/](docs/)
 
 ## 🔗 Related Projects
@@ -347,4 +347,4 @@ This project is licensed under the MIT License - see the [LICENSE.rst](LICENSE.r
 
 **Built with ❤️ and Rust** 🦀
 
-*KitKat: Because version control should be easy to understand!*
+*KitCat: Because version control should be easy to understand!*

@@ -100,7 +100,7 @@ fn get_commit_parents(commit_hash: &str) -> io::Result<Vec<String>> {
 
     let obj_dir = &commit_hash[0..2];
     let obj_file = &commit_hash[2..];
-    let obj_path = format!(".kitkat/objects/{}/{}", obj_dir, obj_file);
+    let obj_path = format!(".kitcat/objects/{}/{}", obj_dir, obj_file);
 
     if !std::path::Path::new(&obj_path).exists() {
         return Ok(Vec::new());

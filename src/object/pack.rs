@@ -237,7 +237,7 @@ impl PackFile {
 
 /// Pack loose objects into a packfile
 pub fn pack_objects() -> io::Result<usize> {
-    let objects_dir = Path::new(".kitkat/objects");
+    let objects_dir = Path::new(".kitcat/objects");
     if !objects_dir.exists() {
         return Ok(0);
     }
@@ -306,7 +306,7 @@ pub fn pack_objects() -> io::Result<usize> {
 
     if object_count > 0 {
         // Create pack directory
-        let pack_dir = Path::new(".kitkat/objects/pack");
+        let pack_dir = Path::new(".kitcat/objects/pack");
         fs::create_dir_all(pack_dir)?;
 
         // Generate pack filename

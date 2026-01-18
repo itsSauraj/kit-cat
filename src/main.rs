@@ -11,17 +11,18 @@ mod utils;
 use clap::{Parser, Subcommand};
 use commands::*;
 
-/// Command line interface for KitKat
+/// Command line interface for KitCat VCS
 #[derive(Parser)]
-#[command(name = "kitkat")]
+#[command(name = "kitcat")]
 #[command(version = "0.1.0")]
-#[command(about = "A minimal Git implementation in Rust")]
+#[command(about = "A minimal Git-like version control system in Rust")]
+#[command(long_about = "KitCat - A Git-like VCS written in Rust\n\nAliases: kitcat, kit-cat, kc, kit")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
 }
 
-/// Available commands for KitKat
+/// Available commands for KitCat VCS
 #[derive(Subcommand)]
 enum Commands {
     /// Initialize a new repository
@@ -216,7 +217,7 @@ fn main() {
             } else if let Some(branch_name) = name {
                 // Create or switch branch
                 // Try to switch first, if it exists
-                if std::path::Path::new(&format!(".kitkat/refs/heads/{}", branch_name)).exists() {
+                if std::path::Path::new(&format!(".kitcat/refs/heads/{}", branch_name)).exists() {
                     if let Err(e) = switch_branch(&branch_name) {
                         eprintln!("Error: {}", e);
                         std::process::exit(1);

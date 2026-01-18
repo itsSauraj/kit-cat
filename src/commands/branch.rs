@@ -4,7 +4,7 @@ use std::path::Path;
 
 /// List all branches, highlighting the current one
 pub fn list_branches() -> io::Result<()> {
-    let refs_dir = Path::new(".kitkat/refs/heads");
+    let refs_dir = Path::new(".kitcat/refs/heads");
 
     if !refs_dir.exists() {
         println!("No branches yet.");
@@ -68,7 +68,7 @@ pub fn create_branch(name: &str) -> io::Result<()> {
         ));
     }
 
-    let branch_path = Path::new(".kitkat/refs/heads").join(name);
+    let branch_path = Path::new(".kitcat/refs/heads").join(name);
 
     // Check if branch already exists
     if branch_path.exists() {
@@ -83,7 +83,7 @@ pub fn create_branch(name: &str) -> io::Result<()> {
     let commit_hash = if head_content.starts_with("ref:") {
         // HEAD points to a branch - get that branch's commit
         let branch_ref = head_content.trim_start_matches("ref: ").trim();
-        let branch_file = format!(".kitkat/{}", branch_ref);
+        let branch_file = format!(".kitcat/{}", branch_ref);
 
         if !Path::new(&branch_file).exists() {
             return Err(io::Error::new(
@@ -112,7 +112,7 @@ pub fn create_branch(name: &str) -> io::Result<()> {
     }
 
     // Create the branch file
-    fs::create_dir_all(".kitkat/refs/heads")?;
+    fs::create_dir_all(".kitcat/refs/heads")?;
     fs::write(&branch_path, &commit_hash)?;
 
     println!("Created branch '{}'", name);
@@ -121,7 +121,7 @@ pub fn create_branch(name: &str) -> io::Result<()> {
 
 /// Delete a branch
 pub fn delete_branch(name: &str, force: bool) -> io::Result<()> {
-    let branch_path = Path::new(".kitkat/refs/heads").join(name);
+    let branch_path = Path::new(".kitcat/refs/heads").join(name);
 
     // Check if branch exists
     if !branch_path.exists() {
@@ -154,7 +154,7 @@ pub fn delete_branch(name: &str, force: bool) -> io::Result<()> {
 
 /// Switch to a different branch
 pub fn switch_branch(name: &str) -> io::Result<()> {
-    let branch_path = Path::new(".kitkat/refs/heads").join(name);
+    let branch_path = Path::new(".kitcat/refs/heads").join(name);
 
     // Check if branch exists
     if !branch_path.exists() {

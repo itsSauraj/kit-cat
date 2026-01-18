@@ -127,7 +127,7 @@ pub fn merge(options: MergeOptions) -> io::Result<()> {
             fs::write(path, content)?;
         }
 
-        println!("\nAutomatic merge failed; fix conflicts and then run 'kitkat merge --continue'");
+        println!("\nAutomatic merge failed; fix conflicts and then run 'kitcat merge --continue'");
         return Ok(());
     }
 
@@ -149,10 +149,10 @@ pub fn merge(options: MergeOptions) -> io::Result<()> {
     // Update HEAD
     if head_content.starts_with("ref:") {
         let branch_name = head_content.trim_start_matches("ref: ").trim();
-        let branch_path = format!(".kitkat/{}", branch_name);
+        let branch_path = format!(".kitcat/{}", branch_name);
         fs::write(&branch_path, &merge_commit)?;
     } else {
-        fs::write(".kitkat/HEAD", &merge_commit)?;
+        fs::write(".kitcat/HEAD", &merge_commit)?;
     }
 
     println!("Merge completed successfully");
@@ -165,10 +165,10 @@ pub fn merge(options: MergeOptions) -> io::Result<()> {
 fn fast_forward_merge(head_content: &str, target_commit: &str) -> io::Result<()> {
     if head_content.starts_with("ref:") {
         let branch_name = head_content.trim_start_matches("ref: ").trim();
-        let branch_path = format!(".kitkat/{}", branch_name);
+        let branch_path = format!(".kitcat/{}", branch_name);
         fs::write(&branch_path, target_commit)?;
     } else {
-        fs::write(".kitkat/HEAD", target_commit)?;
+        fs::write(".kitcat/HEAD", target_commit)?;
     }
 
     // Update working directory to match target
@@ -200,7 +200,7 @@ fn create_merge_commit(message: &str, parent1: &str, parent2: &str) -> io::Resul
 fn resolve_head(head_content: &str) -> io::Result<String> {
     if head_content.starts_with("ref:") {
         let branch_name = head_content.trim_start_matches("ref: ").trim();
-        let branch_path = format!(".kitkat/{}", branch_name);
+        let branch_path = format!(".kitcat/{}", branch_name);
 
         if !Path::new(&branch_path).exists() {
             return Err(io::Error::new(
@@ -218,7 +218,7 @@ fn resolve_head(head_content: &str) -> io::Result<String> {
 /// Resolve a ref (branch name or commit hash) to commit hash
 fn resolve_ref(ref_name: &str) -> io::Result<String> {
     // Check if it's a branch name
-    let branch_path = format!(".kitkat/refs/heads/{}", ref_name);
+    let branch_path = format!(".kitcat/refs/heads/{}", ref_name);
     if Path::new(&branch_path).exists() {
         return Ok(fs::read_to_string(&branch_path)?.trim().to_string());
     }
@@ -241,19 +241,19 @@ fn save_merge_state(
     our_branch: &str,
     their_branch: &str,
 ) -> io::Result<()> {
-    fs::create_dir_all(".kitkat/merge")?;
-    fs::write(".kitkat/MERGE_HEAD", their_commit)?;
-    fs::write(".kitkat/MERGE_MODE", "merge")?;
-    fs::write(".kitkat/merge/our_commit", our_commit)?;
-    fs::write(".kitkat/merge/their_commit", their_commit)?;
-    fs::write(".kitkat/merge/our_branch", our_branch)?;
-    fs::write(".kitkat/merge/their_branch", their_branch)?;
+    fs::create_dir_all(".kitcat/merge")?;
+    fs::write(".kitcat/MERGE_HEAD", their_commit)?;
+    fs::write(".kitcat/MERGE_MODE", "merge")?;
+    fs::write(".kitcat/merge/our_commit", our_commit)?;
+    fs::write(".kitcat/merge/their_commit", their_commit)?;
+    fs::write(".kitcat/merge/our_branch", our_branch)?;
+    fs::write(".kitcat/merge/their_branch", their_branch)?;
     Ok(())
 }
 
 /// Continue merge after conflict resolution
 fn continue_merge(message: Option<&str>) -> io::Result<()> {
-    if !Path::new(".kitkat/MERGE_HEAD").exists() {
+    if !Path::new(".kitcat/MERGE_HEAD").exists() {
         return Err(io::Error::new(
             io::ErrorKind::NotFound,
             "No merge in progress",
@@ -275,10 +275,10 @@ fn continue_merge(message: Option<&str>) -> io::Result<()> {
     }
 
     // Read merge state
-    let their_commit = fs::read_to_string(".kitkat/MERGE_HEAD")?.trim().to_string();
-    let our_commit = fs::read_to_string(".kitkat/merge/our_commit")?.trim().to_string();
-    let our_branch = fs::read_to_string(".kitkat/merge/our_branch")?;
-    let their_branch = fs::read_to_string(".kitkat/merge/their_branch")?;
+    let their_commit = fs::read_to_string(".kitcat/MERGE_HEAD")?.trim().to_string();
+    let our_commit = fs::read_to_string(".kitcat/merge/our_commit")?.trim().to_string();
+    let our_branch = fs::read_to_string(".kitcat/merge/our_branch")?;
+    let their_branch = fs::read_to_string(".kitcat/merge/their_branch")?;
 
     // Create merge commit
     let default_msg = format!("Merge {} into {}", their_branch.trim(), our_branch.trim());
@@ -289,16 +289,16 @@ fn continue_merge(message: Option<&str>) -> io::Result<()> {
     let head_content = read_head();
     if head_content.starts_with("ref:") {
         let branch_name = head_content.trim_start_matches("ref: ").trim();
-        let branch_path = format!(".kitkat/{}", branch_name);
+        let branch_path = format!(".kitcat/{}", branch_name);
         fs::write(&branch_path, &merge_commit)?;
     } else {
-        fs::write(".kitkat/HEAD", &merge_commit)?;
+        fs::write(".kitcat/HEAD", &merge_commit)?;
     }
 
     // Clean up merge state
-    fs::remove_file(".kitkat/MERGE_HEAD")?;
-    fs::remove_file(".kitkat/MERGE_MODE")?;
-    fs::remove_dir_all(".kitkat/merge")?;
+    fs::remove_file(".kitcat/MERGE_HEAD")?;
+    fs::remove_file(".kitcat/MERGE_MODE")?;
+    fs::remove_dir_all(".kitcat/merge")?;
 
     println!("Merge completed successfully");
     println!("Merge commit: {}", merge_commit);
@@ -308,23 +308,23 @@ fn continue_merge(message: Option<&str>) -> io::Result<()> {
 
 /// Abort merge and restore original state
 fn abort_merge() -> io::Result<()> {
-    if !Path::new(".kitkat/MERGE_HEAD").exists() {
+    if !Path::new(".kitcat/MERGE_HEAD").exists() {
         return Err(io::Error::new(
             io::ErrorKind::NotFound,
             "No merge in progress",
         ));
     }
 
-    let our_commit = fs::read_to_string(".kitkat/merge/our_commit")?.trim().to_string();
+    let our_commit = fs::read_to_string(".kitcat/merge/our_commit")?.trim().to_string();
 
     // Restore to our original commit
     let tree_hash = get_commit_tree(&our_commit)?;
     checkout_tree(&tree_hash)?;
 
     // Clean up merge state
-    fs::remove_file(".kitkat/MERGE_HEAD")?;
-    fs::remove_file(".kitkat/MERGE_MODE")?;
-    fs::remove_dir_all(".kitkat/merge")?;
+    fs::remove_file(".kitcat/MERGE_HEAD")?;
+    fs::remove_file(".kitcat/MERGE_MODE")?;
+    fs::remove_dir_all(".kitcat/merge")?;
 
     println!("Merge aborted");
 
@@ -387,7 +387,7 @@ fn collect_tree_files(
 fn read_object_content(hash: &str) -> io::Result<Vec<u8>> {
     let obj_dir = &hash[0..2];
     let obj_file = &hash[2..];
-    let obj_path = format!(".kitkat/objects/{}/{}", obj_dir, obj_file);
+    let obj_path = format!(".kitcat/objects/{}/{}", obj_dir, obj_file);
 
     let compressed = fs::read(&obj_path)?;
     let content = crate::utils::decompress(&compressed)?;

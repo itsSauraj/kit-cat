@@ -8,7 +8,7 @@ pub fn init() {
     }
 
     match crate::repo::init_repo() {
-        Ok(_) => eprintln!("Initialized empty kitkat repository."),
+        Ok(_) => eprintln!("Initialized empty kitcat repository."),
         Err(e) => eprintln!("Failed to initialize repository: {}", e),
     }
 }
@@ -116,7 +116,7 @@ pub fn commit(message: String) {
     let entries = crate::index::read_index();
     if entries.is_empty() {
         eprintln!("Nothing to commit (no files in index).");
-        eprintln!("Use 'kitkat add <file>' to add files to the index.");
+        eprintln!("Use 'kitcat add <file>' to add files to the index.");
         return;
     }
 
@@ -134,7 +134,7 @@ pub fn commit(message: String) {
     let parents = if head_content.starts_with("ref:") {
         // HEAD points to a branch
         let branch_name = head_content.trim_start_matches("ref: ").trim();
-        let branch_path = format!(".kitkat/{}", branch_name);
+        let branch_path = format!(".kitcat/{}", branch_name);
         if std::path::Path::new(&branch_path).exists() {
             vec![std::fs::read_to_string(&branch_path)
                 .unwrap_or_default()
@@ -162,7 +162,7 @@ pub fn commit(message: String) {
     // Update HEAD/branch reference
     if head_content.starts_with("ref:") {
         let branch_name = head_content.trim_start_matches("ref: ").trim();
-        let branch_path = format!(".kitkat/{}", branch_name);
+        let branch_path = format!(".kitcat/{}", branch_name);
         if let Err(e) = std::fs::write(&branch_path, &commit_hash) {
             eprintln!("Failed to update branch: {}", e);
             return;

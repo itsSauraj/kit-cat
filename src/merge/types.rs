@@ -51,7 +51,7 @@ impl FileConflict {
         if self.is_binary {
             return format!(
                 "Binary file conflict in {}\n\
-                 Use 'kitkat checkout --ours {}' or 'kitkat checkout --theirs {}'\n",
+                 Use 'kitcat checkout --ours {}' or 'kitcat checkout --theirs {}'\n",
                 self.path, self.path, self.path
             )
             .into_bytes();

@@ -14,10 +14,10 @@ use std::path::Path;
 /// - Entries (sorted by path)
 /// - SHA-1 checksum of entire index (20 bytes)
 pub fn write_index(entries: &[IndexEntry]) -> io::Result<()> {
-    let index_path = Path::new(".kitkat/index");
+    let index_path = Path::new(".kitcat/index");
 
     // Create a temporary file first for atomic write
-    let temp_path = Path::new(".kitkat/index.lock");
+    let temp_path = Path::new(".kitcat/index.lock");
 
     // Open the lock file with exclusive access
     let mut file = OpenOptions::new()

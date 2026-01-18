@@ -5,7 +5,7 @@ use std::path::Path;
 
 /// Read the index from binary format
 pub fn read_index_binary() -> io::Result<Vec<IndexEntry>> {
-    let index_path = Path::new(".kitkat/index");
+    let index_path = Path::new(".kitcat/index");
 
     if !index_path.exists() {
         return Ok(Vec::new());

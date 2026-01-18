@@ -100,7 +100,7 @@ fn collect_refs(refs: &mut Vec<String>) -> io::Result<()> {
     }
 
     // Read all branches
-    let refs_dir = Path::new(".kitkat/refs/heads");
+    let refs_dir = Path::new(".kitcat/refs/heads");
     if refs_dir.exists() {
         collect_refs_from_dir(refs_dir, refs)?;
     }
@@ -133,7 +133,7 @@ fn collect_refs_from_dir(dir: &Path, refs: &mut Vec<String>) -> io::Result<()> {
 fn resolve_ref(ref_content: &str) -> io::Result<String> {
     if ref_content.starts_with("ref:") {
         let branch_name = ref_content.trim_start_matches("ref: ").trim();
-        let branch_path = format!(".kitkat/{}", branch_name);
+        let branch_path = format!(".kitcat/{}", branch_name);
 
         if Path::new(&branch_path).exists() {
             Ok(fs::read_to_string(&branch_path)?.trim().to_string())
@@ -152,7 +152,7 @@ fn resolve_ref(ref_content: &str) -> io::Result<String> {
 fn get_object_children(hash: &str) -> io::Result<Vec<String>> {
     let obj_dir = &hash[0..2];
     let obj_file = &hash[2..];
-    let obj_path = format!(".kitkat/objects/{}/{}", obj_dir, obj_file);
+    let obj_path = format!(".kitcat/objects/{}/{}", obj_dir, obj_file);
 
     if !Path::new(&obj_path).exists() {
         return Ok(Vec::new());
@@ -211,7 +211,7 @@ fn prune_unreachable_objects(
     dry_run: bool,
 ) -> io::Result<usize> {
     let mut pruned_count = 0;
-    let objects_dir = Path::new(".kitkat/objects");
+    let objects_dir = Path::new(".kitcat/objects");
 
     if !objects_dir.exists() {
         return Ok(0);

@@ -104,7 +104,7 @@ pub fn status() -> io::Result<()> {
     // Staged changes
     if has_staged {
         println!("\nChanges to be committed:");
-        println!("  (use \"kitkat reset HEAD <file>...\" to unstage)");
+        println!("  (use \"kitcat reset HEAD <file>...\" to unstage)");
         println!();
 
         for file in &staged_new {
@@ -121,8 +121,8 @@ pub fn status() -> io::Result<()> {
     // Unstaged changes
     if has_unstaged {
         println!("\nChanges not staged for commit:");
-        println!("  (use \"kitkat add <file>...\" to update what will be committed)");
-        println!("  (use \"kitkat checkout -- <file>...\" to discard changes in working directory)");
+        println!("  (use \"kitcat add <file>...\" to update what will be committed)");
+        println!("  (use \"kitcat checkout -- <file>...\" to discard changes in working directory)");
         println!();
 
         for file in &unstaged_modified {
@@ -136,7 +136,7 @@ pub fn status() -> io::Result<()> {
     // Untracked files
     if has_untracked {
         println!("\nUntracked files:");
-        println!("  (use \"kitkat add <file>...\" to include in what will be committed)");
+        println!("  (use \"kitcat add <file>...\" to include in what will be committed)");
         println!();
 
         for file in &untracked {
@@ -156,7 +156,7 @@ fn get_head_tree_entries() -> io::Result<HashMap<String, String>> {
     // Get commit hash
     let commit_hash = if head_content.starts_with("ref:") {
         let branch_name = head_content.trim_start_matches("ref: ").trim();
-        let branch_path = format!(".kitkat/{}", branch_name);
+        let branch_path = format!(".kitcat/{}", branch_name);
 
         if !Path::new(&branch_path).exists() {
             return Ok(HashMap::new()); // No commits yet
@@ -218,9 +218,9 @@ fn get_working_files() -> io::Result<HashMap<String, String>> {
     for entry in WalkDir::new(".")
         .into_iter()
         .filter_entry(|e| {
-            // Only filter out the .kitkat directory, not all hidden files
+            // Only filter out the .kitcat directory, not all hidden files
             let file_name = e.file_name().to_str().unwrap_or("");
-            file_name != ".kitkat"
+            file_name != ".kitcat"
         })
         .filter_map(|e| e.ok())
     {
