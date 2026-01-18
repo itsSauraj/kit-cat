@@ -2,12 +2,12 @@
 name = "kitcat"
 version = "0.2.0-beta.1"
 edition = "2024"
-authors = ["Saurabh Kumar <itsSauraj@users.noreply.github.com>"]
+authors = ["Saurabh Yadav <sauraj.contact@gmail.com >"]
 description = "A Git-like version control system written in Rust with support for branching, merging, and packfiles"
 license = "MIT"
-repository = "https://github.com/itsSauraj/kitkat"
-homepage = "https://github.com/itsSauraj/kitkat"
-documentation = "https://github.com/itsSauraj/kitkat#readme"
+repository = "https://github.com/itsSauraj/kit-kat"
+homepage = "https://github.com/itsSauraj/kit-kat"
+documentation = "https://github.com/itsSauraj/kit-kat#readme"
 readme = "README.md"
 keywords = ["vcs", "git", "version-control", "cli", "scm"]
 categories = ["command-line-utilities", "development-tools"]
