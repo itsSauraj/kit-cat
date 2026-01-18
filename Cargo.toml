@@ -1,7 +1,22 @@
 [package]
 name = "kitcat"
-version = "0.1.0"
+version = "0.2.0-beta.1"
 edition = "2024"
+authors = ["Saurabh Kumar <itsSauraj@users.noreply.github.com>"]
+description = "A Git-like version control system written in Rust with support for branching, merging, and packfiles"
+license = "MIT"
+repository = "https://github.com/itsSauraj/kitkat"
+homepage = "https://github.com/itsSauraj/kitkat"
+documentation = "https://github.com/itsSauraj/kitkat#readme"
+readme = "README.md"
+keywords = ["vcs", "git", "version-control", "cli", "scm"]
+categories = ["command-line-utilities", "development-tools"]
+exclude = [
+    "release/",
+    "dev-docs/",
+    ".gitignore",
+    ".claude/",
+]
 
 [[bin]]
 name = "kitcat"
@@ -32,3 +47,17 @@ fs2 = "0.4"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 hex = "0.4"
+
+[package.metadata.deb]
+maintainer = "KitCat Contributors <noreply@anthropic.com>"
+copyright = "2026, KitCat Contributors"
+section = "vcs"
+priority = "optional"
+depends = ""
+assets = [
+    ["target/release/kitcat", "usr/bin/", "755"],
+    ["target/release/kit-cat", "usr/bin/", "755"],
+    ["target/release/kc", "usr/bin/", "755"],
+    ["target/release/kit", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/kitcat/", "644"],
+]
