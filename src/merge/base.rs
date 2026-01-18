@@ -144,7 +144,7 @@ mod tests {
 
     #[test]
     fn test_empty_ancestors() {
-        let ancestors = HashSet::new();
+        let ancestors: HashSet<String> = HashSet::new();
         assert_eq!(ancestors.len(), 0);
     }
 }

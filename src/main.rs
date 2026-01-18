@@ -14,7 +14,7 @@ use commands::*;
 /// Command line interface for KitCat VCS
 #[derive(Parser)]
 #[command(name = "kitcat")]
-#[command(version = "0.1.0")]
+#[command(version = "0.2.0-beta.1")]
 #[command(about = "A minimal Git-like version control system in Rust")]
 #[command(long_about = "KitCat - A Git-like VCS written in Rust\n\nAliases: kitcat, kit-cat, kc, kit")]
 struct Cli {
