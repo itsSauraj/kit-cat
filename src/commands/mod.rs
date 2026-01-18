@@ -1,10 +1,20 @@
 pub mod branch;
+pub mod checkout;
 pub mod commands;
+pub mod diff;
+pub mod gc;
 pub mod log;
+pub mod merge;
+pub mod status;
 
 // Re-export functions
 pub use branch::{create_branch, delete_branch, list_branches, show_current_branch, switch_branch};
+pub use checkout::{checkout, checkout_file};
+pub use diff::{diff, DiffMode, DiffOptions};
+pub use gc::{gc, GcOptions};
 pub use log::{log, log_with_filter, LogFormat};
+pub use merge::{merge, MergeOptions};
+pub use status::status;
 pub use commands::add_to_index;
 pub use commands::commit;
 pub use commands::get_config_cmd;

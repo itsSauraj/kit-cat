@@ -33,3 +33,11 @@ pub fn decompress_data(data: &[u8]) -> Vec<u8> {
     decoder.read_to_end(&mut out).unwrap();
     out
 }
+
+/// Decompress data using Zlib (with Result for error handling)
+pub fn decompress(data: &[u8]) -> std::io::Result<Vec<u8>> {
+    let mut decoder = ZlibDecoder::new(data);
+    let mut out = Vec::new();
+    decoder.read_to_end(&mut out)?;
+    Ok(out)
+}

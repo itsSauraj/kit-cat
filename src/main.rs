@@ -1,6 +1,8 @@
 mod commands;
 mod config;
+mod diff;
 mod index;
+mod merge;
 mod models;
 mod object;
 mod repo;
@@ -97,6 +99,67 @@ enum Commands {
         #[arg(short = 'n', long = "max-count")]
         max_count: Option<usize>,
     },
+    /// Show working tree status
+    Status,
+    /// Checkout a branch, commit, or restore files
+    Checkout {
+        /// Branch name, commit hash, or file path
+        target: String,
+        /// Force checkout even with uncommitted changes
+        #[arg(short = 'f', long = "force")]
+        force: bool,
+        /// Restore file from index (use with -- before filename)
+        #[arg(long = "file")]
+        file: bool,
+    },
+    /// Show changes between commits, commit and working tree, etc
+    Diff {
+        /// Show staged changes (index vs HEAD)
+        #[arg(long = "cached")]
+        cached: bool,
+        /// First commit to compare (optional)
+        commit1: Option<String>,
+        /// Second commit to compare (optional, requires commit1)
+        commit2: Option<String>,
+        /// Show statistics
+        #[arg(long = "stat")]
+        stat: bool,
+        /// Disable color output
+        #[arg(long = "no-color")]
+        no_color: bool,
+    },
+    /// Join two or more development histories together
+    Merge {
+        /// Branch or commit to merge
+        target: Option<String>,
+        /// Abort the current merge
+        #[arg(long = "abort")]
+        abort: bool,
+        /// Continue merge after resolving conflicts
+        #[arg(long = "continue")]
+        r#continue: bool,
+        /// Create a merge commit even if fast-forward is possible
+        #[arg(long = "no-ff")]
+        no_ff: bool,
+        /// Refuse to merge unless fast-forward is possible
+        #[arg(long = "ff-only")]
+        ff_only: bool,
+        /// Commit message for merge commit
+        #[arg(short = 'm', long = "message")]
+        message: Option<String>,
+    },
+    /// Cleanup unnecessary files and optimize the local repository
+    Gc {
+        /// Run aggressive garbage collection
+        #[arg(long = "aggressive")]
+        aggressive: bool,
+        /// Prune unreachable objects older than specified days
+        #[arg(long = "prune")]
+        prune_days: Option<u32>,
+        /// Dry run - show what would be deleted without deleting
+        #[arg(long = "dry-run")]
+        dry_run: bool,
+    },
 }
 
 fn main() {
@@ -181,6 +244,105 @@ fn main() {
             };
 
             if let Err(e) = log(format, max_count) {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Commands::Status => {
+            if let Err(e) = status() {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Commands::Checkout {
+            target,
+            force,
+            file,
+        } => {
+            if file {
+                // Restore file from index
+                if let Err(e) = checkout_file(&target) {
+                    eprintln!("Error: {}", e);
+                    std::process::exit(1);
+                }
+            } else {
+                // Checkout branch or commit
+                if let Err(e) = checkout(&target, force) {
+                    eprintln!("Error: {}", e);
+                    std::process::exit(1);
+                }
+            }
+        }
+        Commands::Diff {
+            cached,
+            commit1,
+            commit2,
+            stat,
+            no_color,
+        } => {
+            let mode = if cached {
+                DiffMode::IndexVsHead
+            } else if let (Some(_c1), Some(_c2)) = (&commit1, &commit2) {
+                DiffMode::CommitVsCommit
+            } else if commit1.is_some() {
+                DiffMode::WorkingVsCommit
+            } else {
+                DiffMode::WorkingVsIndex
+            };
+
+            let options = DiffOptions {
+                mode,
+                commit1: commit1.clone(),
+                commit2: commit2.clone(),
+                paths: vec![],
+                use_color: !no_color,
+                show_stats: stat,
+            };
+
+            if let Err(e) = diff(options) {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Commands::Merge {
+            target,
+            abort,
+            r#continue,
+            no_ff,
+            ff_only,
+            message,
+        } => {
+            if !abort && !r#continue && target.is_none() {
+                eprintln!("Error: branch or commit to merge is required");
+                std::process::exit(1);
+            }
+
+            let options = MergeOptions {
+                target: target.unwrap_or_default(),
+                abort,
+                r#continue,
+                no_ff,
+                ff_only,
+                message,
+            };
+
+            if let Err(e) = merge(options) {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Commands::Gc {
+            aggressive,
+            prune_days,
+            dry_run,
+        } => {
+            let options = GcOptions {
+                aggressive,
+                prune_days,
+                dry_run,
+            };
+
+            if let Err(e) = gc(options) {
                 eprintln!("Error: {}", e);
                 std::process::exit(1);
             }
