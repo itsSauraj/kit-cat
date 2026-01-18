@@ -1,0 +1,396 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Extract release notes from tag message
+        id: release_notes
+        run: |
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          TAG_MESSAGE=$(git tag -l --format='%(contents)' ${GITHUB_REF#refs/tags/})
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$TAG_MESSAGE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: KitCat ${{ steps.get_version.outputs.version }}
+          body: ${{ steps.release_notes.outputs.notes }}
+          draft: false
+          prerelease: ${{ contains(steps.get_version.outputs.version, 'alpha') || contains(steps.get_version.outputs.version, 'beta') || contains(steps.get_version.outputs.version, 'rc') }}
+
+  build-linux:
+    name: Build Linux
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install cargo-deb
+        run: cargo install cargo-deb --version 2.0.0 || true
+
+      - name: Build release binaries
+        run: cargo build --release --verbose
+
+      - name: Create DEB package
+        run: cargo deb --no-build
+
+      - name: Create tarball with all binaries
+        run: |
+          mkdir -p kitcat-${{ needs.create-release.outputs.version }}-linux-x86_64
+          cp target/release/kitcat kitcat-${{ needs.create-release.outputs.version }}-linux-x86_64/
+          cp target/release/kit-cat kitcat-${{ needs.create-release.outputs.version }}-linux-x86_64/
+          cp target/release/kc kitcat-${{ needs.create-release.outputs.version }}-linux-x86_64/
+          cp target/release/kit kitcat-${{ needs.create-release.outputs.version }}-linux-x86_64/
+          cp README.md kitcat-${{ needs.create-release.outputs.version }}-linux-x86_64/
+          tar czf kitcat-${{ needs.create-release.outputs.version }}-linux-x86_64.tar.gz kitcat-${{ needs.create-release.outputs.version }}-linux-x86_64/
+
+      - name: Generate checksums
+        run: |
+          cd target/debian
+          sha256sum *.deb > SHA256SUMS
+          cd ../..
+          sha256sum kitcat-${{ needs.create-release.outputs.version }}-linux-x86_64.tar.gz >> target/debian/SHA256SUMS
+
+      - name: Upload DEB package
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: target/debian/kitcat_${{ needs.create-release.outputs.version }}_amd64.deb
+          asset_name: kitcat_${{ needs.create-release.outputs.version }}_amd64.deb
+          asset_content_type: application/vnd.debian.binary-package
+
+      - name: Upload Linux tarball
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: kitcat-${{ needs.create-release.outputs.version }}-linux-x86_64.tar.gz
+          asset_name: kitcat-${{ needs.create-release.outputs.version }}-linux-x86_64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload checksums
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: target/debian/SHA256SUMS
+          asset_name: SHA256SUMS-linux
+          asset_content_type: text/plain
+
+  build-macos:
+    name: Build macOS
+    needs: create-release
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            arch: x86_64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            arch: aarch64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-${{ matrix.arch }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build release binaries
+        run: cargo build --release --target ${{ matrix.target }} --verbose
+
+      - name: Create tarball
+        run: |
+          mkdir -p kitcat-${{ needs.create-release.outputs.version }}-macos-${{ matrix.arch }}
+          cp target/${{ matrix.target }}/release/kitcat kitcat-${{ needs.create-release.outputs.version }}-macos-${{ matrix.arch }}/
+          cp target/${{ matrix.target }}/release/kit-cat kitcat-${{ needs.create-release.outputs.version }}-macos-${{ matrix.arch }}/
+          cp target/${{ matrix.target }}/release/kc kitcat-${{ needs.create-release.outputs.version }}-macos-${{ matrix.arch }}/
+          cp target/${{ matrix.target }}/release/kit kitcat-${{ needs.create-release.outputs.version }}-macos-${{ matrix.arch }}/
+          cp README.md kitcat-${{ needs.create-release.outputs.version }}-macos-${{ matrix.arch }}/
+          tar czf kitcat-${{ needs.create-release.outputs.version }}-macos-${{ matrix.arch }}.tar.gz kitcat-${{ needs.create-release.outputs.version }}-macos-${{ matrix.arch }}/
+
+      - name: Generate checksum
+        run: sha256sum kitcat-${{ needs.create-release.outputs.version }}-macos-${{ matrix.arch }}.tar.gz > SHA256SUMS-macos-${{ matrix.arch }}
+
+      - name: Upload macOS tarball
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: kitcat-${{ needs.create-release.outputs.version }}-macos-${{ matrix.arch }}.tar.gz
+          asset_name: kitcat-${{ needs.create-release.outputs.version }}-macos-${{ matrix.arch }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: SHA256SUMS-macos-${{ matrix.arch }}
+          asset_name: SHA256SUMS-macos-${{ matrix.arch }}
+          asset_content_type: text/plain
+
+  build-windows:
+    name: Build Windows
+    needs: create-release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build release binaries
+        run: cargo build --release --verbose
+
+      - name: Create zip with all binaries
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path "kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64"
+          Copy-Item "target/release/kitcat.exe" "kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64/"
+          Copy-Item "target/release/kit-cat.exe" "kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64/"
+          Copy-Item "target/release/kc.exe" "kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64/"
+          Copy-Item "target/release/kit.exe" "kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64/"
+          Copy-Item "README.md" "kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64/"
+          Compress-Archive -Path "kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64" -DestinationPath "kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64.zip"
+
+      - name: Install cargo-wix
+        run: cargo install cargo-wix --version 0.3.8 || echo "cargo-wix already installed"
+
+      - name: Create WiX configuration
+        shell: pwsh
+        run: |
+          $wixConfig = @"
+          <?xml version='1.0' encoding='windows-1252'?>
+          <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+            <Product
+              Id='*'
+              Name='KitCat'
+              UpgradeCode='12345678-1234-1234-1234-123456789012'
+              Manufacturer='KitCat Contributors'
+              Language='1033'
+              Codepage='1252'
+              Version='${{ needs.create-release.outputs.version }}'>
+
+              <Package Id='*'
+                Keywords='Installer'
+                Description='KitCat VCS Installer'
+                Manufacturer='KitCat Contributors'
+                InstallerVersion='450'
+                Languages='1033'
+                Compressed='yes'
+                SummaryCodepage='1252'
+                InstallScope='perMachine' />
+
+              <MajorUpgrade
+                Schedule='afterInstallInitialize'
+                DowngradeErrorMessage='A newer version is already installed. Setup will now exit.' />
+
+              <Media Id='1' Cabinet='kitcat.cab' EmbedCab='yes' DiskPrompt='CD-ROM #1' />
+              <Property Id='DiskPrompt' Value='KitCat Installation' />
+
+              <Directory Id='TARGETDIR' Name='SourceDir'>
+                <Directory Id='ProgramFilesFolder' Name='PFiles'>
+                  <Directory Id='APPLICATIONFOLDER' Name='KitCat'>
+                    <Component Id='MainExecutable' Guid='*'>
+                      <File
+                        Id='kitcatEXE'
+                        Name='kitcat.exe'
+                        DiskId='1'
+                        Source='target\release\kitcat.exe'
+                        KeyPath='yes' />
+                      <File
+                        Id='kitcatEXE2'
+                        Name='kit-cat.exe'
+                        DiskId='1'
+                        Source='target\release\kit-cat.exe' />
+                      <File
+                        Id='kcEXE'
+                        Name='kc.exe'
+                        DiskId='1'
+                        Source='target\release\kc.exe' />
+                      <File
+                        Id='kitEXE'
+                        Name='kit.exe'
+                        DiskId='1'
+                        Source='target\release\kit.exe' />
+                      <Environment
+                        Id='PATH'
+                        Name='PATH'
+                        Value='[APPLICATIONFOLDER]'
+                        Permanent='no'
+                        Part='last'
+                        Action='set'
+                        System='yes' />
+                    </Component>
+                  </Directory>
+                </Directory>
+              </Directory>
+
+              <Feature
+                Id='MainFeature'
+                Title='KitCat'
+                Description='KitCat VCS'
+                Level='1'
+                ConfigurableDirectory='APPLICATIONFOLDER'
+                AllowAdvertise='no'
+                Display='expand'
+                Absent='disallow'>
+                <ComponentRef Id='MainExecutable' />
+              </Feature>
+
+              <Property Id='WIXUI_INSTALLDIR' Value='APPLICATIONFOLDER' />
+              <UIRef Id='WixUI_InstallDir' />
+              <UIRef Id='WixUI_ErrorProgressText' />
+
+            </Product>
+          </Wix>
+          "@
+          Set-Content -Path "wix/main.wxs" -Value $wixConfig
+
+      - name: Create MSI installer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "wix"
+          cargo wix --nocapture || echo "WiX build may have warnings"
+
+      - name: Generate checksums
+        shell: pwsh
+        run: |
+          $zip = Get-FileHash -Path "kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64.zip" -Algorithm SHA256
+          "$($zip.Hash)  kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64.zip" | Out-File -FilePath "SHA256SUMS-windows" -Encoding ASCII
+          if (Test-Path "target/wix/kitcat-*.msi") {
+            $msi = Get-FileHash -Path (Get-Item "target/wix/kitcat-*.msi").FullName -Algorithm SHA256
+            "$($msi.Hash)  kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64.msi" | Out-File -FilePath "SHA256SUMS-windows" -Append -Encoding ASCII
+          }
+
+      - name: Upload Windows zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64.zip
+          asset_name: kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64.zip
+          asset_content_type: application/zip
+
+      - name: Find and upload MSI
+        id: find_msi
+        shell: pwsh
+        run: |
+          $msiFile = Get-Item "target/wix/kitcat-*.msi" -ErrorAction SilentlyContinue
+          if ($msiFile) {
+            Copy-Item $msiFile.FullName "kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64.msi"
+            echo "msi_exists=true" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "msi_exists=false" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Upload Windows MSI
+        if: steps.find_msi.outputs.msi_exists == 'true'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64.msi
+          asset_name: kitcat-${{ needs.create-release.outputs.version }}-windows-x86_64.msi
+          asset_content_type: application/x-msi
+
+      - name: Upload checksums
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: SHA256SUMS-windows
+          asset_name: SHA256SUMS-windows
+          asset_content_type: text/plain
+
+  publish-crates-io:
+    name: Publish to crates.io
+    needs: [create-release, build-linux, build-macos, build-windows]
+    runs-on: ubuntu-latest
+    if: "!contains(needs.create-release.outputs.version, 'alpha') && !contains(needs.create-release.outputs.version, 'beta') && !contains(needs.create-release.outputs.version, 'rc')"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Publish to crates.io
+        run: cargo publish --token ${{ secrets.CARGO_TOKEN }}
+        continue-on-error: true
